@@ -262,7 +262,7 @@ function backupUI(){
   document.getElementById('bkIn').onclick=()=>document.getElementById('bkFile').click();
   document.getElementById('bkFile').onchange=async ev=>{ const f=ev.target.files[0]; if(!f) return; try{
     const d=JSON.parse(await f.text()); if(!d||typeof d!=='object'||Array.isArray(d)) throw 0;
-    S=Object.assign(BLANK(),d); S.updatedAt=Date.now(); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); msg('Backup importado.');
+    S=Object.assign(BLANK(),d); persist(); render(); msg('Backup importado.');
   }catch(e){ msg('Arquivo inválido.') } ev.target.value=''; };
 }
 let SB=null, UID=null, MAIL=null;
