@@ -267,7 +267,7 @@ function backupUI(){
 }
 function setSync(t){ const el=document.getElementById('syncState'); if(el) el.textContent=t;
   let p=document.getElementById('syncPill'); if(!p){ p=document.createElement('div'); p.id='syncPill'; p.style.cssText='position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));font:12px system-ui,sans-serif;padding:3px 9px;border-radius:12px;background:var(--paper);color:var(--ink);border:1px solid var(--line2);opacity:.85;z-index:50;pointer-events:none'; document.body.appendChild(p); }
-  p.hidden=!UID; p.textContent=(/Sincronizado/.test(t)?'☁ ':/Sincroniz/.test(t)?'⟳ ':'⚠ ')+t; }
+  p.style.pointerEvents=UID?'none':'auto'; p.style.cursor=UID?'':'pointer'; p.onclick=UID?null:()=>{const d=document.querySelector('#authBox details'); if(d){d.open=true; d.scrollIntoView({behavior:'smooth',block:'center'}); const m=document.getElementById('sbMail'); if(m) m.focus();}}; if(!UID){ p.textContent='⚠ Sem sincronização · toque para entrar'; return; } p.textContent=(/Sincronizado/.test(t)?'☁ ':/Sincroniz/.test(t)?'⟳ ':'⚠ ')+t; }
 let SB=null, UID=null, MAIL=null;
 async function sbStart(){
   try{
@@ -345,7 +345,7 @@ function authUI(){
 }
 sbStart();
 
-backupUI(); new MutationObserver(()=>{ if(!document.getElementById('bkBox')) backupUI(); authUI(); }).observe(document.body,{childList:true,subtree:true});
+setSync(''); backupUI(); new MutationObserver(()=>{ if(!document.getElementById('bkBox')) backupUI(); authUI(); }).observe(document.body,{childList:true,subtree:true});
 
 /* ---------- Gamificação ---------- */
 const LEVELS=['Candidato','Inscrito','Em preparação','Constante','Competitivo','Aprovável','Classificado','Nomeado','Empossado'];
