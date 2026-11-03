@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Plataforma gratuita de estudo para concursos com questões reais, gabaritos oficiais e aulas gratuitas.">
 <style>[hidden]{display:none!important}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <title>Rumo à Posse</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -264,7 +265,52 @@ function backupUI(){
     S=Object.assign(BLANK(),d); S.updatedAt=Date.now(); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); msg('Backup importado.');
   }catch(e){ msg('Arquivo inválido.') } ev.target.value=''; };
 }
-backupUI(); new MutationObserver(()=>{ if(!document.getElementById('bkBox')) backupUI(); }).observe(document.body,{childList:true,subtree:true});
+let SB=null, UID=null, MAIL=null;
+async function sbStart(){
+  try{
+    if(!window.supabase) return;
+    SB=supabase.createClient('https://yqiwcighfohcdovhihvp.supabase.co','sb_publishable_qN-5otd_jUA2eJWr8efzkg_q6uCBI_t',{auth:{persistSession:true,detectSessionInUrl:false}});
+    const {data:{session}}=await SB.auth.getSession();
+    if(session&&session.user) await sbUser(session.user);
+    authUI();
+  }catch(e){ authUI(); }
+}
+async function sbUser(u){
+  UID=u.id; MAIL=u.email;
+  dbRef={ set: async obj=>{ const {error}=await SB.from('progresso').upsert({user_id:UID,data:obj,updated_at:new Date().toISOString()}); if(error) throw error; } };
+  try{
+    const {data,error}=await SB.from('progresso').select('data').eq('user_id',UID).maybeSingle();
+    if(error) throw error;
+    if(data&&data.data&&(data.data.updatedAt||0)>(S.updatedAt||0)){ S=Object.assign(BLANK(),data.data); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); }
+    else if(S.updatedAt) await flush();
+    setSync('sincronizado na sua conta ✓');
+  }catch(e){ setSync('sem conexão com a conta; salvo neste navegador'); }
+}
+function authUI(){
+  const foot=document.getElementById('syncState'); if(!foot) return;
+  let el=document.getElementById('authBox');
+  if(!el){ el=document.createElement('div'); el.id='authBox'; el.style.marginTop='8px'; foot.parentNode.insertBefore(el,foot.nextSibling); }
+  if(el.dataset.mail===(MAIL||'')&&el.innerHTML) return; el.dataset.mail=MAIL||'';
+  const inp='padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--paper);color:var(--ink);flex:1;min-width:120px';
+  if(MAIL){ el.innerHTML='<span class="note">Sincronizando como '+esc(MAIL)+'</span> <button class="btn sm" id="sbOut">Sair</button>';
+    document.getElementById('sbOut').onclick=async()=>{await SB.auth.signOut(); UID=null;MAIL=null;dbRef=null; setSync('salvo neste navegador'); authUI();}; return; }
+  el.innerHTML='<details><summary class="note" style="cursor:pointer">Sincronizar entre aparelhos (opcional)</summary><form id="sbForm" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><input id="sbMail" type="email" required placeholder="e-mail" autocomplete="username" style="'+inp+'"><input id="sbPass" type="password" required minlength="6" placeholder="senha (mín. 6)" autocomplete="current-password" style="'+inp+'"><button class="btn sm pri" type="submit">Entrar</button><button class="btn sm" id="sbNew" type="button">Criar conta</button></form><div class="note" id="sbMsg">Sem conta, tudo fica salvo só neste navegador.</div></details>';
+  const msg=t=>{document.getElementById('sbMsg').textContent=t};
+  async function go(kind){
+    const m=document.getElementById('sbMail').value.trim(), pw=document.getElementById('sbPass').value;
+    if(!SB){msg('Servidor indisponível agora.');return} if(!m||pw.length<6){msg('Informe e-mail e senha de 6+ caracteres.');return}
+    msg('Aguarde…');
+    const r=kind==='new'?await SB.auth.signUp({email:m,password:pw}):await SB.auth.signInWithPassword({email:m,password:pw});
+    if(r.error){ msg(r.error.message==='Invalid login credentials'?'E-mail ou senha incorretos.':'Erro: '+r.error.message); return }
+    if(!r.data.session){ msg('Conta criada, mas o Supabase exige confirmar o e-mail. Desligue "Confirm email" no painel.'); return }
+    await sbUser(r.data.session.user); authUI();
+  }
+  document.getElementById('sbForm').onsubmit=ev=>{ev.preventDefault();go('in')};
+  document.getElementById('sbNew').onclick=()=>go('new');
+}
+sbStart();
+
+backupUI(); new MutationObserver(()=>{ if(!document.getElementById('bkBox')) backupUI(); authUI(); }).observe(document.body,{childList:true,subtree:true});
 
 /* ---------- Gamificação ---------- */
 const LEVELS=['Candidato','Inscrito','Em preparação','Constante','Competitivo','Aprovável','Classificado','Nomeado','Empossado'];
