@@ -252,7 +252,7 @@ function setSync(t){const el=$('#syncState'); if(el) el.textContent=t}
 function backupUI(){
   const foot=document.getElementById('syncState'); if(!foot||document.getElementById('bkBox')) return;
   const el=document.createElement('div'); el.id='bkBox'; el.style.cssText='margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center';
-  el.innerHTML='<button class="btn sm" id="bkOut">Exportar backup</button><button class="btn sm" id="bkIn">Importar backup</button><input type="file" id="bkFile" accept="application/json,.json" hidden><span class="note" id="bkMsg">Seu progresso fica salvo neste navegador. Exporte um arquivo para guardar ou levar a outro aparelho.</span>';
+  el.innerHTML='<details><summary class="note" style="cursor:pointer">Avançado: backup em arquivo</summary><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px"><button class="btn sm" id="bkOut">Exportar backup</button><button class="btn sm" id="bkIn">Importar backup</button><input type="file" id="bkFile" accept="application/json,.json" hidden><span class="note" id="bkMsg">Extra: guarda ou restaura o progresso em um arquivo.</span></div></details>';
   foot.parentNode.insertBefore(el,foot.nextSibling);
   const msg=t=>{document.getElementById('bkMsg').textContent=t};
   document.getElementById('bkOut').onclick=()=>{ try{
@@ -265,6 +265,9 @@ function backupUI(){
     S=Object.assign(BLANK(),d); persist(); render(); msg('Backup importado.');
   }catch(e){ msg('Arquivo inválido.') } ev.target.value=''; };
 }
+function setSync(t){ const el=document.getElementById('syncState'); if(el) el.textContent=t;
+  let p=document.getElementById('syncPill'); if(!p){ p=document.createElement('div'); p.id='syncPill'; p.style.cssText='position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));font:12px system-ui,sans-serif;padding:3px 9px;border-radius:12px;background:var(--paper);color:var(--ink);border:1px solid var(--line2);opacity:.85;z-index:50;pointer-events:none'; document.body.appendChild(p); }
+  p.hidden=!UID; p.textContent=(/Sincronizado/.test(t)?'☁ ':/Sincroniz/.test(t)?'⟳ ':'⚠ ')+t; }
 let SB=null, UID=null, MAIL=null;
 async function sbStart(){
   try{
@@ -275,17 +278,49 @@ async function sbStart(){
     authUI();
   }catch(e){ authUI(); }
 }
+function mergeS(a,b){
+  const r=JSON.parse(JSON.stringify(a)), nw=(b.updatedAt||0)>(a.updatedAt||0);
+  const mx=(k)=>{ r[k]=Object.assign({},a[k]||{}); for(const d in (b[k]||{})) r[k][d]=Math.max(r[k][d]||0,b[k][d]||0); };
+  mx('days'); mx('xpd'); r.xp=Math.max(a.xp||0,b.xp||0);
+  r.ans=Object.assign({},a.ans||{}); r.srs=Object.assign({},a.srs||{});
+  for(const id in (b.ans||{})){ const x=(a.ans||{})[id], y=b.ans[id]; if(!x||(y.n||0)>(x.n||0)){ r.ans[id]=y; if(b.srs&&b.srs[id]) r.srs[id]=b.srs[id]; else delete r.srs[id]; } }
+  for(const id in (b.srs||{})) if(!(id in r.srs)&&!(b.ans&&b.ans[id]&&(a.ans||{})[id]&&(a.ans[id].n||0)>=(b.ans[id].n||0))) r.srs[id]=b.srs[id];
+  r.cards=Object.assign({},b.cards||{},a.cards||{});
+  r.daily=Object.assign({},a.daily||{}); for(const d in (b.daily||{})){ const x=r.daily[d], y=b.daily[d]; if(!x||(y.n||0)>(x.n||0)) r.daily[d]=y; }
+  r.badges=Object.assign({},b.badges||{},a.badges||{}); r.vid=Object.assign({},b.vid||{},a.vid||{});
+  const seen=new Set(), sims=[]; for(const s of [].concat(a.sims||[],b.sims||[])){ const k=JSON.stringify(s); if(!seen.has(k)){seen.add(k);sims.push(s)} } sims.sort((x,y)=>String(x.d).localeCompare(String(y.d))); r.sims=sims;
+  if(nw){ r.goal=b.goal; r.plan=b.plan; }
+  r.updatedAt=Math.max(a.updatedAt||0,b.updatedAt||0);
+  return r;
+}
+async function pullMerge(){
+  if(!SB||!UID) return false;
+  const {data,error}=await SB.from('progresso').select('data').eq('user_id',UID).maybeSingle();
+  if(error) throw error;
+  if(!(data&&data.data)) return false;
+  const m=mergeS(S,data.data);
+  if(JSON.stringify(m)===JSON.stringify(S)) return false;
+  S=Object.assign(BLANK(),m); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); return true;
+}
+let pulling=false;
+async function autoPull(){
+  if(!UID||pulling||document.hidden) return; pulling=true;
+  try{ setSync('Sincronizando…'); const ch=await pullMerge(); if(ch) await dbRef.set(JSON.parse(JSON.stringify(S))); setSync('Sincronizado ✓'); }
+  catch(e){ setSync('Sem conexão; salvo neste aparelho'); } pulling=false;
+}
 async function sbUser(u){
   UID=u.id; MAIL=u.email;
-  dbRef={ set: async obj=>{ const {error}=await SB.from('progresso').upsert({user_id:UID,data:obj,updated_at:new Date().toISOString()}); if(error) throw error; } };
-  try{
-    const {data,error}=await SB.from('progresso').select('data').eq('user_id',UID).maybeSingle();
-    if(error) throw error;
-    if(data&&data.data&&(data.data.updatedAt||0)>(S.updatedAt||0)){ S=Object.assign(BLANK(),data.data); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); }
-    else if(S.updatedAt) await flush();
-    setSync('sincronizado na sua conta ✓');
-  }catch(e){ setSync('sem conexão com a conta; salvo neste navegador'); }
+  dbRef={ set: async obj=>{
+    let cur=obj;
+    try{ const {data}=await SB.from('progresso').select('data').eq('user_id',UID).maybeSingle();
+      if(data&&data.data){ const m=mergeS(S,data.data); cur=m; if(JSON.stringify(m)!==JSON.stringify(S)){ S=Object.assign(BLANK(),m); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); } } }catch(e){}
+    const {error}=await SB.from('progresso').upsert({user_id:UID,data:cur,updated_at:new Date().toISOString()}); if(error) throw error; } };
+  try{ const ch=await pullMerge(); if(ch||S.updatedAt) await flush(); setSync('Sincronizado ✓'); }
+  catch(e){ setSync('Sem conexão; salvo neste aparelho'); }
 }
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) autoPull(); });
+window.addEventListener('focus',()=>autoPull());
+setInterval(autoPull,60000);
 function authUI(){
   const foot=document.getElementById('syncState'); if(!foot) return;
   let el=document.getElementById('authBox');
@@ -293,7 +328,7 @@ function authUI(){
   if(el.dataset.mail===(MAIL||'')&&el.innerHTML) return; el.dataset.mail=MAIL||'';
   const inp='padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--paper);color:var(--ink);flex:1;min-width:120px';
   if(MAIL){ el.innerHTML='<span class="note">Sincronizando como '+esc(MAIL)+'</span> <button class="btn sm" id="sbOut">Sair</button>';
-    document.getElementById('sbOut').onclick=async()=>{await SB.auth.signOut(); UID=null;MAIL=null;dbRef=null; setSync('salvo neste navegador'); authUI();}; return; }
+    document.getElementById('sbOut').onclick=async()=>{await SB.auth.signOut(); UID=null;MAIL=null;dbRef=null; setSync('Salvo neste aparelho'); authUI();}; return; }
   el.innerHTML='<details><summary class="note" style="cursor:pointer">Sincronizar entre aparelhos (opcional)</summary><form id="sbForm" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><input id="sbMail" type="email" required placeholder="e-mail" autocomplete="username" style="'+inp+'"><input id="sbPass" type="password" required minlength="6" placeholder="senha (mín. 6)" autocomplete="current-password" style="'+inp+'"><button class="btn sm pri" type="submit">Entrar</button><button class="btn sm" id="sbNew" type="button">Criar conta</button></form><div class="note" id="sbMsg">Sem conta, tudo fica salvo só neste navegador.</div></details>';
   const msg=t=>{document.getElementById('sbMsg').textContent=t};
   async function go(kind){
