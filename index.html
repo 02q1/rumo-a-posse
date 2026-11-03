@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Plataforma gratuita de estudo para concursos com questões reais, gabaritos oficiais e aulas gratuitas.">
 <style>[hidden]{display:none!important}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <title>Rumo à Posse</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -248,39 +247,24 @@ async function flush(){
   saving=false; if(pending){pending=false;flush()}
 }
 function setSync(t){const el=$('#syncState'); if(el) el.textContent=t}
-let SB=null, UID=null;
-async function sbStart(){
-  try{
-    if(!window.supabase) { setSync('salvando neste navegador'); return; }
-    SB=supabase.createClient('https://yqiwcighfohcdovhihvp.supabase.co','sb_publishable_qN-5otd_jUA2eJWr8efzkg_q6uCBI_t',{auth:{persistSession:true,detectSessionInUrl:true,flowType:'pkce'}});
-    const {data:{session}}=await SB.auth.getSession();
-    SB.auth.onAuthStateChange((ev,s)=>{ if(s&&s.user&&s.user.id!==UID) sbUser(s.user); if(!s){UID=null;dbRef=null;authUI();} });
-    if(session&&session.user) await sbUser(session.user); else authUI();
-  }catch(e){ setSync('salvando neste navegador'); authUI(); }
+
+function backupUI(){
+  const foot=document.getElementById('syncState'); if(!foot||document.getElementById('bkBox')) return;
+  const el=document.createElement('div'); el.id='bkBox'; el.style.cssText='margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center';
+  el.innerHTML='<button class="btn sm" id="bkOut">Exportar backup</button><button class="btn sm" id="bkIn">Importar backup</button><input type="file" id="bkFile" accept="application/json,.json" hidden><span class="note" id="bkMsg">Seu progresso fica salvo neste navegador. Exporte um arquivo para guardar ou levar a outro aparelho.</span>';
+  foot.parentNode.insertBefore(el,foot.nextSibling);
+  const msg=t=>{document.getElementById('bkMsg').textContent=t};
+  document.getElementById('bkOut').onclick=()=>{ try{
+    const blob=new Blob([JSON.stringify(S)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='rumo-a-posse-backup-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); a.remove(); msg('Backup exportado.');
+  }catch(e){msg('Não consegui exportar.')} };
+  document.getElementById('bkIn').onclick=()=>document.getElementById('bkFile').click();
+  document.getElementById('bkFile').onchange=async ev=>{ const f=ev.target.files[0]; if(!f) return; try{
+    const d=JSON.parse(await f.text()); if(!d||typeof d!=='object'||Array.isArray(d)) throw 0;
+    S=Object.assign(BLANK(),d); S.updatedAt=Date.now(); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); msg('Backup importado.');
+  }catch(e){ msg('Arquivo inválido.') } ev.target.value=''; };
 }
-async function sbUser(u){
-  UID=u.id; authUI(u.email);
-  dbRef={ set: async obj=>{ const {error}=await SB.from('progresso').upsert({user_id:UID,data:obj,updated_at:new Date().toISOString()}); if(error) throw error; } };
-  try{
-    const {data,error}=await SB.from('progresso').select('data').eq('user_id',UID).maybeSingle();
-    if(error) throw error;
-    if(data&&data.data&&(data.data.updatedAt||0)>(S.updatedAt||0)){ S=Object.assign(BLANK(),data.data); try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} render(); }
-    else if(S.updatedAt) await flush();
-    setSync('salvo na sua conta ✓');
-  }catch(e){ setSync('não consegui falar com o servidor; salvando neste navegador'); }
-}
-function authUI(email){
-  let el=document.getElementById('authBox'); const foot=document.getElementById('syncState'); if(!foot) return;
-  if(!el){ el=document.createElement('div'); el.id='authBox'; el.style.marginTop='8px'; foot.parentNode.insertBefore(el,foot.nextSibling); }
-  if(email){ el.innerHTML='<span class="note">Conectado como '+esc(email)+'</span> <button class="btn sm" id="sbOut">Sair</button>'; document.getElementById('sbOut').onclick=async()=>{await SB.auth.signOut(); setSync('salvando neste navegador');}; return; }
-  el.innerHTML='<form id="sbForm" style="display:flex;gap:6px;flex-wrap:wrap"><input id="sbMail" type="email" required placeholder="seu e-mail" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--paper);color:var(--ink)"><button class="btn sm pri">Entrar</button></form><div class="note" id="sbMsg">Entre com o e-mail para salvar o progresso e usar em qualquer aparelho. Sem senha: chega um link.</div>';
-  document.getElementById('sbForm').onsubmit=async ev=>{ ev.preventDefault(); const m=document.getElementById('sbMail').value.trim(), msg=document.getElementById('sbMsg');
-    if(!SB){msg.textContent='Servidor indisponível agora.';return}
-    msg.textContent='Enviando…';
-    const {error}=await SB.auth.signInWithOtp({email:m,options:{emailRedirectTo:location.origin+location.pathname}});
-    msg.textContent=error?('Não foi possível enviar: '+error.message):'Link enviado. Abra o e-mail neste aparelho e clique nele.'; };
-}
-sbStart();
+backupUI(); new MutationObserver(()=>{ if(!document.getElementById('bkBox')) backupUI(); }).observe(document.body,{childList:true,subtree:true});
 
 /* ---------- Gamificação ---------- */
 const LEVELS=['Candidato','Inscrito','Em preparação','Constante','Competitivo','Aprovável','Classificado','Nomeado','Empossado'];
