@@ -1,0 +1,1 @@
+^\s*Ministério Público da União\s*$|^\s*FGV Conhecimento\s*$|Tipo 1 – Branca|PROVA OBJETIVA|MÓDULO|PROVA DISCURSIVA|^\s*(Analista|Técnico) do MPU\s*$|^\s*[AT]\d\d - (Analista|Técnico) do MPU
