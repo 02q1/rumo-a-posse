@@ -280,7 +280,7 @@ ol.fases li.past{opacity:.7}
   <main><div class="wrap" id="view"></div></main>
 </div>
 
-<script src="dados.js?v=cceb09fb45"></script>
+<script src="dados.js?v=70c8f4b108"></script>
 <script>
 
 "use strict";
@@ -321,13 +321,17 @@ let SYNC_TXT='Salvo neste aparelho';
 function setSync(t){ if(t) SYNC_TXT=t; document.querySelectorAll('[data-sync]').forEach(el=>el.textContent=SYNC_TXT); }
 const IS_ART=!!(window.claude&&window.claude.use);
 function localSave(){ try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} }
+async function saveFile(name,text,mime){
+  if(IS_ART){ const dl=await window.claude.use('downloads'); if(!dl) throw new Error('unavailable');
+    try{ await dl.save({filename:name,data:new Blob([text],{type:mime})}); return true }catch(e){ if(e&&e.code==='declined') return false; throw e } }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:mime})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); return true;
+}
 function backupUI(){
   const slot=document.getElementById('bkSlot'); if(!slot) return;
   slot.innerHTML='<div class="row" style="gap:6px"><button class="btn sm" id="bkOut">Exportar backup</button><button class="btn sm" id="bkIn">Importar backup</button><input type="file" id="bkFile" accept="application/json,.json" hidden></div><div class="note" id="bkMsg" style="margin-top:6px">Guarda ou restaura todo o seu progresso em um arquivo.</div>';
   const msg=t=>{document.getElementById('bkMsg').textContent=t};
   document.getElementById('bkOut').onclick=()=>{ try{
-    const blob=new Blob([JSON.stringify(S)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download='rumo-a-posse-backup-'+today()+'.json'; document.body.appendChild(a); a.click(); a.remove(); msg('Backup exportado.');
+    saveFile('rumo-a-posse-backup-'+today()+'.json',JSON.stringify(S),'application/json').then(ok=>msg(ok?'Backup exportado.':'Exportação cancelada.'),()=>msg('Não consegui exportar.'));
   }catch(e){msg('Não consegui exportar.')} };
   document.getElementById('bkIn').onclick=()=>document.getElementById('bkFile').click();
   document.getElementById('bkFile').onchange=async ev=>{ const f=ev.target.files[0]; if(!f) return; try{
@@ -1359,7 +1363,7 @@ function agendaHTML(){
    <p class="note">Marque os dias em que você estuda e quanto tempo tem. A agenda distribui os blocos de 50 minutos pela ordem de prioridade do seu ciclo (as matérias que mais precisam aparecem primeiro).</p>
    <div class="agcfg">${DIAS.map((d,i)=>`<label class="chk"><input type="checkbox" data-agd="${i}" ${A.dias[i]?'checked':''}> ${d}</label><select data-agm="${i}" aria-label="Minutos em ${d}" ${A.dias[i]?'':'disabled'}>${[30,60,90,120,180,240].map(m=>`<option value="${m}" ${m===A.min[i]?'selected':''}>${m>=60?(m/60).toString().replace('.',',')+' h':m+' min'}</option>`).join('')}</select>`).join('')}</div>
    <div class="agenda">${plan.map(p=>`<div class="agday ${p.items.length?'':'off'}"><b>${p.d}</b>${p.items.length?p.items.map(t=>`<span>${esc(t)}</span>`).join(''):'<span class="note">descanso</span>'}</div>`).join('')}</div>
-   <div class="row" style="margin-top:10px"><a class="btn sm" href="data:text/calendar;charset=utf-8,${encodeURIComponent(icsAgenda(plan))}" download="agenda-rumo-a-posse.ics">Baixar para o calendário (.ics)</a></div></div>`;
+   <div class="row" style="margin-top:10px">${IS_ART?'<span class="note">A exportação para o calendário (.ics) está disponível na versão site.</span>':`<a class="btn sm" href="data:text/calendar;charset=utf-8,${encodeURIComponent(icsAgenda(plan))}" download="agenda-rumo-a-posse.ics">Baixar para o calendário (.ics)</a>`}</div></div>`;
 }
 function icsAgenda(plan){
   const base=new Date(today()+'T12:00:00'); const dow=(base.getDay()+6)%7; const mon=addDays(today(),-dow);

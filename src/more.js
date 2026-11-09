@@ -275,7 +275,7 @@ function agendaHTML(){
    <p class="note">Marque os dias em que você estuda e quanto tempo tem. A agenda distribui os blocos de 50 minutos pela ordem de prioridade do seu ciclo (as matérias que mais precisam aparecem primeiro).</p>
    <div class="agcfg">${DIAS.map((d,i)=>`<label class="chk"><input type="checkbox" data-agd="${i}" ${A.dias[i]?'checked':''}> ${d}</label><select data-agm="${i}" aria-label="Minutos em ${d}" ${A.dias[i]?'':'disabled'}>${[30,60,90,120,180,240].map(m=>`<option value="${m}" ${m===A.min[i]?'selected':''}>${m>=60?(m/60).toString().replace('.',',')+' h':m+' min'}</option>`).join('')}</select>`).join('')}</div>
    <div class="agenda">${plan.map(p=>`<div class="agday ${p.items.length?'':'off'}"><b>${p.d}</b>${p.items.length?p.items.map(t=>`<span>${esc(t)}</span>`).join(''):'<span class="note">descanso</span>'}</div>`).join('')}</div>
-   <div class="row" style="margin-top:10px"><a class="btn sm" href="data:text/calendar;charset=utf-8,${encodeURIComponent(icsAgenda(plan))}" download="agenda-rumo-a-posse.ics">Baixar para o calendário (.ics)</a></div></div>`;
+   <div class="row" style="margin-top:10px">${IS_ART?'<span class="note">A exportação para o calendário (.ics) está disponível na versão site.</span>':`<a class="btn sm" href="data:text/calendar;charset=utf-8,${encodeURIComponent(icsAgenda(plan))}" download="agenda-rumo-a-posse.ics">Baixar para o calendário (.ics)</a>`}</div></div>`;
 }
 function icsAgenda(plan){
   const base=new Date(today()+'T12:00:00'); const dow=(base.getDay()+6)%7; const mon=addDays(today(),-dow);

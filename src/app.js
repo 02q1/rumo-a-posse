@@ -37,13 +37,17 @@ let SYNC_TXT='Salvo neste aparelho';
 function setSync(t){ if(t) SYNC_TXT=t; document.querySelectorAll('[data-sync]').forEach(el=>el.textContent=SYNC_TXT); }
 const IS_ART=!!(window.claude&&window.claude.use);
 function localSave(){ try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} }
+async function saveFile(name,text,mime){
+  if(IS_ART){ const dl=await window.claude.use('downloads'); if(!dl) throw new Error('unavailable');
+    try{ await dl.save({filename:name,data:new Blob([text],{type:mime})}); return true }catch(e){ if(e&&e.code==='declined') return false; throw e } }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:mime})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); return true;
+}
 function backupUI(){
   const slot=document.getElementById('bkSlot'); if(!slot) return;
   slot.innerHTML='<div class="row" style="gap:6px"><button class="btn sm" id="bkOut">Exportar backup</button><button class="btn sm" id="bkIn">Importar backup</button><input type="file" id="bkFile" accept="application/json,.json" hidden></div><div class="note" id="bkMsg" style="margin-top:6px">Guarda ou restaura todo o seu progresso em um arquivo.</div>';
   const msg=t=>{document.getElementById('bkMsg').textContent=t};
   document.getElementById('bkOut').onclick=()=>{ try{
-    const blob=new Blob([JSON.stringify(S)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download='rumo-a-posse-backup-'+today()+'.json'; document.body.appendChild(a); a.click(); a.remove(); msg('Backup exportado.');
+    saveFile('rumo-a-posse-backup-'+today()+'.json',JSON.stringify(S),'application/json').then(ok=>msg(ok?'Backup exportado.':'Exportação cancelada.'),()=>msg('Não consegui exportar.'));
   }catch(e){msg('Não consegui exportar.')} };
   document.getElementById('bkIn').onclick=()=>document.getElementById('bkFile').click();
   document.getElementById('bkFile').onchange=async ev=>{ const f=ev.target.files[0]; if(!f) return; try{
