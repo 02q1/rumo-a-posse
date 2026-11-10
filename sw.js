@@ -1,5 +1,5 @@
 /* Service worker: guarda o site para funcionar sem internet. Versão trocada a cada build. */
-const C='rumo-70c8f4b108';
+const C='rumo-42d7a5a031';
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(C).then(c=>c.addAll(['./','index.html','manifest.webmanifest','icon.svg'])).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
 self.addEventListener('fetch',e=>{

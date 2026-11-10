@@ -692,6 +692,56 @@ const ALVOS={
  gestao:{n:'APO e EPPGG (CNU)',w:[['AFO e Orçamento Público',3],['Economia e Regulação',3],['Políticas Públicas',2],['Administração Geral e Pública',2],['Direito Constitucional',2],['Direito Administrativo',2],['Língua Portuguesa',2],['Raciocínio Lógico e Matemática',1]]},
  agencia:{n:'Agências reguladoras',w:[['Economia e Regulação',4],['Direito Administrativo',3],['Direito Constitucional',2],['Língua Portuguesa',2],['Raciocínio Lógico e Matemática',1],['Ética e Integridade',1]]},
 };
+/* Modo concurso: estrutura da prova conferida no edital oficial (PDFs oficiais) em 03/11/2026.
+   q = questões, p = peso por questão, est = o edital não divide o bloco por matéria (divisão igual, estimada). */
+const K_LP='Língua Portuguesa', K_RL='Raciocínio Lógico e Matemática', K_DC='Direito Constitucional', K_DA='Direito Administrativo', K_AFO='AFO e Orçamento Público', K_AGP='Administração Geral e Pública', K_TI='Tecnologia da Informação e Dados', K_ECO='Economia e Regulação';
+const EDC=[
+ {id:'seplag_apo',n:'SEPLAG-RJ · Analista de Planejamento e Orçamento',b:'FGV',prova:'2026-11-29',url:'https://conhecimento.fgv.br/concursos/seplagrj',fonte:'Edital retificado em 09/09/2026, item 10.5.5',regra:'100 questões de 1 ponto cada. Cada questão errada não desconta.',
+  m:[['Língua Portuguesa',12,1,[K_LP]],['Língua Inglesa',6,1,['Língua Inglesa']],['Raciocínio Lógico-matemático',6,1,[K_RL]],['Atualidades',6,1,['Atualidades e Realidade Brasileira']],
+     ['Direito Público',20,1,[K_DC,K_DA]],['Estado, Governo e Administração Pública',10,1,[K_AGP]],['Administração Financeira e Orçamentária',10,1,[K_AFO]],['Economia',15,1,[K_ECO]],['Finanças Públicas e Planejamento Governamental',15,1,[K_AFO,'Políticas Públicas']]]},
+ {id:'sefaz_apofp',n:'SEFAZ-SP · APOFP, área Orçamento e Finanças (A01)',b:'FCC',prova:'2026-12-20',url:'https://www.concursosfcc.com.br/concursos/fazsp126/index.html',fonte:'Edital nº 01/2026, item 7.1 e Anexo II',regra:'P1 (manhã) com pesos 1 e 2; P2 (tarde) com 40 questões de peso 3. Mínimos de 45 pontos na P1 e 48 na P2.',
+  m:[['Adm. Geral, Pública e Auditoria Governamental',8,1,[K_AGP,'Controle Externo e Auditoria']],['Direito Administrativo',10,1,[K_DA]],['Direito Constitucional',10,1,[K_DC]],['Economia',4,1,[K_ECO]],['Língua Portuguesa',10,1,[K_LP]],['Matemática Financeira / Estatística',6,1,[K_RL,'Estatística']],
+     ['Administração Financeira e Orçamentária',8,2,[K_AFO]],['Contabilidade Geral e Pública',8,2,['Contabilidade']],['Direito Financeiro e Finanças Públicas',8,2,[K_AFO]],['Fluência de Dados',8,2,[K_TI]],
+     ['P2: execução orçamentária, LRF, transferências e dívida pública',40,3,[K_AFO,K_ECO]]]},
+ {id:'trt4_aa',n:'TRT4 (RS) · Analista Judiciário, Área Administrativa',b:'FCC',prova:'2027-01-31',url:'https://www.concursosfcc.com.br/concursos/trt4r125/index.html',fonte:'Edital nº 01/2026, item 10.1 e Anexo II',regra:'Gerais: 30 questões, peso 1. Específicos: 30 questões, peso 2. Há também redação.',
+  m:[['Língua Portuguesa',6,1,[K_LP],1],['Matemática e Raciocínio Lógico',6,1,[K_RL],1],['Noções de Legislação (sustentabilidade, acessibilidade etc.)',6,1,['Sustentabilidade','Legislação do tribunal'],1],['Noções de Direitos Humanos',6,1,['Direitos Humanos e Inclusão'],1],['Noções de Informática',6,1,[K_TI],1],
+     ['Noções de Direito Constitucional',7.5,2,[K_DC],1],['Direito Administrativo e Administração Pública (inclui licitações)',7.5,2,[K_DA,K_AGP],1],['Noções de Orçamento Público',7.5,2,[K_AFO],1],['Noções de Gestão de Pessoas',7.5,2,['Gestão de Pessoas'],1]]},
+ {id:'tjpb_aj',n:'TJPB · Analista Judiciário',b:'FGV',prova:'2027-01-24',url:'https://conhecimento.fgv.br/concursos/tjpb26',fonte:'Edital retificado em 30/10/2026, item 10.8.3 e Anexo I',regra:'60 questões de 1 ponto. Aprovação com 60% do total.',
+  m:[['Língua Portuguesa',10,1,[K_LP]],['Ética e Gestão no Serviço Público',5,1,['Ética e Integridade',K_AGP]],['Noções de Informática e Proteção de Dados',5,1,[K_TI]],
+     ['Direito Constitucional',5.7,1,[K_DC],1],['Direito Administrativo',5.7,1,[K_DA],1],['Direito Civil e do Consumidor',5.7,1,['Direito Processual e Civil'],1],['Direito Processual Civil',5.7,1,['Direito Processual e Civil'],1],['Direito Penal',5.7,1,['Direito Penal e Processual Penal'],1],['Direito Processual Penal',5.7,1,['Direito Penal e Processual Penal'],1],['Direitos Humanos e Tutela Coletiva',5.7,1,['Direitos Humanos e Inclusão'],1]]},
+ {id:'abdi_pi',n:'ABDI · Analista de Produtividade Industrial',b:'FGV',prova:'2026-12-20',url:'https://conhecimento.fgv.br/concursos/psabdi',fonte:'Edital nº 01/2026, item 9.1 e Anexo II',regra:'60 questões: gerais e institucionais valem 0,3; específicas valem 0,65. Mínimo de 50% de acertos.',
+  m:[['Língua Portuguesa',8,0.3,[K_LP]],['Raciocínio Lógico',6,0.3,[K_RL]],['Noções de Informática',6,0.3,[K_TI]],['Serviços sociais autônomos; lei, decreto e estatuto da ABDI',8,0.3,[]],['Regulamento de licitações, contratos e convênios',8,0.3,[K_DA]],['Ética, conduta e missão da agência',4,0.3,['Ética e Integridade']],
+     ['Produtividade, processos e qualidade',8.6,0.65,['Gestão de Projetos e Processos','Gestão de Materiais e Logística'],1],['Indústria 4.0 e transformação digital',2.9,0.65,[K_TI],1],['Inovação, competitividade e políticas industriais',5.7,0.65,[K_ECO],1],['Sustentabilidade e eficiência de recursos',2.9,0.65,['Sustentabilidade'],1]]},
+];
+EDC.forEach(c=>{ const w={}; c.m.forEach(([_,q,p,ds])=>ds.forEach(d=>w[d]=(w[d]||0)+q*p/ds.length)); ALVOS['ed_'+c.id]={n:'Edital: '+c.n,w:Object.entries(w).map(([d,v])=>[d,Math.round(v*10)/10])}; });
+function concStats(ds,b){ return statsWhere(q=>!q.ia&&ds.includes(q.disc)&&(!b||SRC[q.src].banca===b)); }
+function concAvail(ds,b){ return REAL.filter(q=>ds.includes(q.disc)&&SRC[q.src].banca===b&&!q.anulada).length; }
+V.concurso=()=>{
+  const c=EDC.find(x=>'ed_'+x.id===S.plan.alvo);
+  const sel=`<div class="panel grid g2"><label class="f">Concurso-alvo<select id="cAlvo"><option value="">Escolha um edital…</option>${EDC.map(x=>`<option value="${x.id}" ${c&&c.id===x.id?'selected':''}>${esc(x.n)} (${x.b})</option>`).join('')}</select></label><label class="f">Horas por semana<input type="number" id="cHoras" min="3" max="60" value="${S.plan.horas}"></label></div>`;
+  const head=`<div><h1>Modo concurso</h1><p class="sub">Escolha o edital e a plataforma passa a seguir a prova dele: pesos reais das matérias, questões da mesma banca e um ciclo semanal que se ajusta ao seu desempenho. O Plano e o Painel passam a usar este alvo.</p></div>`;
+  if(!c) return head+sel+'<div class="panel empty">Escolha um concurso para ver o mapa da prova.</div>';
+  const tot=c.m.reduce((s,r)=>s+r[1]*r[2],0), days=Math.round((new Date(c.prova+'T12:00:00')-new Date(today()+'T12:00:00'))/864e5);
+  const rows=c.m.map(([nm,q,p,ds,est])=>{ const pts=q*p, sb=concStats(ds,c.b), sa=concStats(ds), av=ds.length?concAvail(ds,c.b):0, st=sb.n>=6?sb:sa;
+    const need=pts/tot*(st.n>=6?(1-st.pct/100)+0.3:1.3); return {nm,q,p,ds,est,pts,sb,sa,av,need}; });
+  const sumNeed=rows.reduce((s,r)=>s+r.need,0), H=S.plan.horas*0.75;
+  const anyEst=rows.some(r=>r.est);
+  return head+sel+`<div class="panel" style="display:flex;flex-direction:column;gap:8px"><div class="row between"><div class="row" style="gap:8px"><h2>${esc(c.n)}</h2><span class="chip">${esc(c.b)}</span></div><span class="chip ${days<0?'ghost':days<=30?'bad':'ok'}">${days<0?'Prova já realizada':days===0?'Prova hoje':'Prova em '+isoBR(c.prova)+' · faltam '+days+' dias'}</span></div>
+   <p class="note" style="margin:0">${esc(c.regra)} Fonte: ${esc(c.fonte)}. <a href="${c.url}" target="_blank" rel="noopener">Página oficial</a></p></div>
+  <div class="panel"><div class="row between"><h3>Mapa da prova e prioridades</h3><span class="note">${H.toFixed(1)} h/semana de estudo + ${(S.plan.horas*0.25).toFixed(1)} h de revisão</span></div>
+   <div class="tw" style="margin-top:8px"><table class="plan"><thead><tr><th>Matéria do edital</th><th class="num">Questões</th><th class="num">Peso</th><th class="num">% da nota</th><th>Seu acerto (${esc(c.b)} · geral)</th><th class="num">Horas/sem.</th><th></th></tr></thead><tbody>
+   ${rows.slice().sort((a,b)=>b.need-a.need).map(r=>`<tr><td>${esc(r.nm)}${r.est?' <span class="chip ghost" title="O edital não diz quantas questões desta matéria; dividimos o bloco por igual">estimado</span>':''}</td><td class="num">${r.est?'~'+Math.round(r.q):r.q}</td><td class="num">${String(r.p).replace('.',',')}</td><td class="num">${Math.round(100*r.pts/tot)}%</td>
+     <td>${r.sb.n?r.sb.pct+'% ('+r.sb.n+')':'<span class="note">–</span>'} · ${r.sa.n?r.sa.pct+'% ('+r.sa.n+')':'<span class="note">sem dados</span>'}</td><td class="num">${(H*r.need/sumNeed).toFixed(1)}</td>
+     <td>${r.ds.length?`<a class="btn sm" href="#questoes" data-cq="${esc(r.ds[0])}" data-cb="${r.av?esc(c.b):''}" style="text-decoration:none;white-space:nowrap">${r.av?'Treinar '+esc(c.b)+' ('+r.av+')':'Treinar (outras bancas)'}</a>`:'<span class="note">sem questões no banco</span>'}</td></tr>`).join('')}
+   </tbody></table></div>
+   <p class="note" style="margin:8px 0 0">As horas seguem o peso da matéria na nota e sobem onde seu acerto está baixo (com 6 ou mais respostas). ${anyEst?'“Estimado”: o edital só informa o total do bloco, então dividimos por igual entre as matérias listadas no conteúdo programático. ':''}O botão Treinar abre as questões reais da ${esc(c.b)} na matéria; quando o banco não tem, abre as de outras bancas.</p></div>`;
+};
+V.concurso.after=()=>{
+  $('#cAlvo').onchange=e=>{ S.plan.alvo=e.target.value?'ed_'+e.target.value:'tribunal'; persist(); render(); };
+  $('#cHoras').onchange=e=>{ S.plan.horas=Math.max(3,Math.min(60,+e.target.value||15)); persist(); render(); };
+  document.querySelectorAll('[data-cq]').forEach(b=>b.onclick=()=>qfSet({disc:b.dataset.cq,banca:b.dataset.cb||''}));
+};
+
 function adapt(d,w){ const st=discStats(d); let f=1, why='Peso do edital; ainda sem dados suficientes, então vale o peso padrão.';
   if(st.n>=6){ if(st.pct<50){f=1.6;why='Seu acerto está em '+st.pct+'%: o plano aumentou o tempo desta matéria.'} else if(st.pct<70){f=1.25;why='Acerto de '+st.pct+'%, abaixo da meta de 70%: tempo um pouco maior.'} else if(st.pct>=85&&st.n>=15){f=.75;why='Acerto de '+st.pct+'%: a matéria está madura, o plano reduziu o tempo.'} else why='Acerto de '+st.pct+'%, dentro da meta: mantém o peso.'; }
   return {d,w,f,adj:w*f,st,why}; }

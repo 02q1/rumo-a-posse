@@ -338,7 +338,7 @@ V.perfil.after=()=>{
 
 /* ---------- Mais (menu do celular) ---------- */
 const MENU=[['Estudo',[['questoes','Questões','Banco com filtros, busca e favoritas'],['simulado','Simulados','Formato TRT4, personalizado ou prova inteira'],['revisao','Revisão','Revisão espaçada e caderno de erros'],['flashcards','Flashcards','Fatos que mais caem e seus erros'],['discursivas','Discursivas','Redação no formato FCC com correção por IA'],['aulas','Aulas','Vídeos gratuitos por assunto']]],
- ['Planejamento',[['jornada','Jornada','Fases, concursos de 2027-2028 e frequência'],['edital','Edital verticalizado','TRT4 2026, assunto por assunto'],['plano','Plano e agenda','Ciclo semanal e agenda'],['estatisticas','Desempenho','Acerto por matéria, banca e prova']]],
+ ['Planejamento',[['concurso','Meu concurso','Pesos do edital e treino pela banca'],['jornada','Jornada','Fases, concursos de 2027-2028 e frequência'],['edital','Edital verticalizado','TRT4 2026, assunto por assunto'],['plano','Plano e agenda','Ciclo semanal e agenda'],['estatisticas','Desempenho','Acerto por matéria, banca e prova']]],
  ['Concursos',[['editais','Editais abertos','Inscrições abertas agora'],['concursos','Carreiras','Cargos acima de R$ 8 mil'],['bancas','Bancas','Como cada banca cobra']]],
  ['Conta',[['perfil','Perfil e conta','Nome, sincronização, backup e tutor IA']]]];
 V.mais=()=>`<div><h1>Mais</h1><p class="sub">Todas as seções da plataforma.</p></div>${MENU.map(([g,xs])=>`<div class="panel"><h3>${g}</h3><div class="tiles">${xs.map(([r,t,d])=>`<a class="tile" href="#${r}"><b>${t}</b><span class="note">${d}</span></a>`).join('')}</div></div>`).join('')}<p class="note" data-sync>${esc(SYNC_TXT)}</p>`;
