@@ -1,0 +1,3 @@
+trt24|^\s*-{20,}\s*$|TRIBUNAL REGIONAL DO TRABALHO DA 24ª REGIÃO|^\s*REAPLICAÇÃO\s*$|^\s*FGV CONHECIMENTO\s*$|TIPO (1 – )?BRANCA|PÁGINA \d+|^\s*ANALISTA JUDICIÁRIO - ÁREA|^\s*(– )?(MANHÃ|TARDE)\s*$
+trt16|TRT 16ª REGIÃO|^\s*FGV\s*$|Tipo (1 – )?Branca|Página \d+|^\s*Analista Judiciário \(Área Administrativa
+tjms|Tribunal de Justiça do Estado de Mato Grosso do Sul|^\s*FGV Conhecimento\s*$|Tipo 1\s+\S*\s*Branca|Página \d+|^\s*Analista Judiciário - Área (Fim|Meio)\s*$
