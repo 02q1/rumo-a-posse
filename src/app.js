@@ -216,6 +216,29 @@ const TIPOS=[]; Object.values(SRC).forEach(s=>{ if(s.tipo&&!TIPOS.some(x=>x[0]==
 const TORD=['aj_adm','aj_jud','aj_cg','aj_esp','tc','tec','mpu','cnu_gestao','regulacao','policia','ia']; TIPOS.sort((a,b)=>(TORD.indexOf(a[0])+99)%108-(TORD.indexOf(b[0])+99)%108);
 const srcLabel=s=>s.ia?'Inédita (IA) · estilo '+s.banca:`${s.orgao_curto||s.orgao} ${s.ano}`;
 const ANTIGA='Prova anterior a mudanças importantes na lei (Reforma da Previdência de 2019, Lei 14.133/2021 de licitações, Lei 14.230/2021 de improbidade). O gabarito reflete a lei da época: confira a lei atual.';
+/* Lei alterada: questões revisadas uma a uma contra a lei atual (10/11/2026).
+   'mudou' = a lei atual muda a resposta ou a regra cobrada; 'ok' = a lei citada foi revogada, mas a regra continua. */
+const LEI={
+ 'fcc_trf4_19_aj-23':['mudou','A Lei 8.666 foi revogada pela Lei 14.133/2021. A tomada de preços deixou de existir e o prazo de 8 dias úteis para novas propostas, quando todas são desclassificadas, não foi repetido. Hoje, licitação fracassada leva a nova licitação ou, em certas condições, à dispensa do art. 75, III.'],
+ 'fcc_trf4_19_aj-48':['mudou','A questão trata do cálculo antes da Reforma da Previdência. A EC 103/2019 mudou o cálculo (média de todos os salários desde 07/1994) e acabou com a aposentadoria por tempo de contribuição para novos segurados. Não use esta questão para estudar a regra atual.'],
+ 'fcc_trt15_18_aa-39':['mudou','Na Lei 14.133/2021, a locação de imóvel cujas características de instalação e localização tornem necessária a escolha é inexigibilidade (art. 74, V), não dispensa. A avaliação prévia e o preço compatível com o mercado continuam exigidos.'],
+ 'fcc_trt2_18_aj-66':['mudou','A Lei 13.846/2019 mudou o prazo: a pensão conta do óbito se pedida em até 180 dias (filhos menores de 16 anos) ou 90 dias (demais dependentes). Pela lei atual, o gabarito A só vale se Cleide não for filha menor de 16 anos.'],
+ 'fcc_trt6_18_aa-51':['mudou','A Lei 10.520/2002 (pregão) foi revogada pela Lei 14.133/2021. Hoje o recurso segue o art. 165: a intenção de recorrer é manifestada de imediato, sob pena de preclusão, com 3 dias úteis para as razões.'],
+ 'fcc_trt6_18_aa-52':['mudou','A Lei 8.666 foi revogada. Na Lei 14.133 a concorrência continua aberta a qualquer interessado, mas os prazos mínimos mudaram (art. 55) e a tomada de preços e o convite foram extintos.'],
+ 'fcc_trt6_18_aa-53':['ok','A Lei 8.666 foi revogada, mas a Lei 14.133 (art. 71) mantém a distinção: anulação por ilegalidade, revogação por interesse público decorrente de fato superveniente.'],
+ 'fcc_trt15_18_aj-31':['ok','A Lei 10.520 foi revogada. A Lei 14.133 mantém o pregão para bens e serviços comuns, preferencialmente eletrônico (art. 17, § 2º). O limite de dispensa citado na alternativa B mudou.'],
+ 'fcc_trt15_18_aa-38':['ok','O Decreto 7.892/2013 foi substituído pelo Decreto 11.462/2023 (Lei 14.133, art. 86). A adesão de órgão não participante continua possível, com limites.'],
+ 'fcc_trt2_18_aj-38':['ok','A Lei 8.666 foi revogada; a Lei 14.133 (art. 55, § 1º) mantém a republicação do edital quando a mudança afeta as propostas.'],
+ 'fcc_trt2_18_aj-40':['ok','A Lei 8.666 foi revogada; os convênios seguem a Lei 14.133 (art. 184) e o Decreto 11.531/2023, com plano de trabalho.'],
+ 'fcc_trt2_18_aa-51':['ok','A Lei 8.666 foi revogada; o registro de preços segue na Lei 14.133 (arts. 82 a 86). O convite, citado na alternativa A, foi extinto.'],
+ 'fcc_trt2_18_aa-52':['ok','A Lei 8.666 foi revogada; a Lei 14.133 (art. 124, II, d, e art. 134) mantém o reequilíbrio quando muda a carga tributária.'],
+ 'fcc_trt2_18_aj-30':['ok','A Lei 14.230/2021 reformou a improbidade: todos os atos exigem dolo, e os do art. 10 exigem perda patrimonial efetiva. A classificação usada no gabarito continua valendo.'],
+ 'fcc_trt15_18_aa-41':['ok','A Lei 14.230/2021 reescreveu o conceito de agente público (art. 2º), mas ele continua abrangendo cargos efetivos e empregos públicos.'],
+ 'fcc_trf4_19_aj-46':['ok','A EC 103/2019 renomeou a aposentadoria por invalidez para aposentadoria por incapacidade permanente. A manutenção escalonada por 18 meses (Lei 8.213, art. 47) continua.'],
+ 'fcc_trt2_18_aj-67':['ok','A Lei 13.846/2019 restringiu o auxílio-reclusão ao regime fechado e ao segurado de baixa renda, com carência de 24 contribuições. O art. 80 continua dizendo que ele é devido nas condições da pensão por morte.'],
+};
+const leiChip=q=>{ const l=LEI[q.id]; return !l?'':l[0]==='mudou'?`<span class="chip bad" title="${esc(l[1])}">Lei mudou: resposta desatualizada</span>`:`<span class="chip ok" title="${esc(l[1])}">Lei nova mantém a regra</span>`; };
+const leiNote=q=>{ const l=LEI[q.id]; return l?`<div class="note"><b>${l[0]==='mudou'?'Lei alterada:':'Lei revogada, regra mantida:'}</b> ${esc(l[1])} <span class="note">(revisão por IA em 10/11/2026)</span></div>`:''; };
 
 /* ---------- Componentes ---------- */
 function supportHTML(key){
@@ -230,7 +253,7 @@ function supportHTML(key){
 function metaHTML(q){
   const s=SRC[q.src];
   if(s.ia) return `<div class="qmeta"><span class="qnum">${q.fmt==='CE'?'Item':'Questão'} ${q.n}</span><span class="chip ia">Inédita (IA)</span><span>No estilo ${esc(s.banca)} · não caiu em prova</span><span class="chip ghost">${esc(q.disc)}</span></div>`;
-  return `<div class="qmeta"><span class="qnum">${q.fmt==='CE'?'Item':'Questão'} ${q.n}</span><span class="chip">${esc(s.banca)}</span><span>${esc(s.orgao_curto||s.orgao)} · <b>${s.ano}</b> · ${esc(s.cargo)}</span>${s.antiga?`<span class="chip warn" title="${esc(ANTIGA)}">Prova de ${s.ano}: confira a lei atual</span>`:''}<span class="chip ghost" ${q.auto?'title="Matéria definida por classificação automática (palavras-chave); pode haver erro"':''}>${esc(q.disc)}${q.auto?' · auto':''}</span>${q.anulada?'<span class="chip warn">Anulada</span>':''}</div>`;
+  return `<div class="qmeta"><span class="qnum">${q.fmt==='CE'?'Item':'Questão'} ${q.n}</span><span class="chip">${esc(s.banca)}</span><span>${esc(s.orgao_curto||s.orgao)} · <b>${s.ano}</b> · ${esc(s.cargo)}</span>${s.antiga?`<span class="chip warn" title="${esc(ANTIGA)}">Prova de ${s.ano}: confira a lei atual</span>`:''}<span class="chip ghost" ${q.auto?'title="Matéria definida por classificação automática (palavras-chave); pode haver erro"':''}>${esc(q.disc)}${q.auto?' · auto':''}</span>${q.anulada?'<span class="chip warn">Anulada</span>':''}${leiChip(q)}</div>`;
 }
 function linksHTML(q){
   const s=SRC[q.src];
@@ -265,6 +288,7 @@ function questionCard(q,{onNext,showNext=true,ctx=''}={}){
       <div class="ai">Comentário gerado por IA (Claude) e conferido com o gabarito oficial. Não é comentário da banca. Em caso de dúvida, vale a lei seca e a prova original.</div>`
       :`<div class="ai">Esta questão ainda não tem comentário escrito. O enunciado e o gabarito foram conferidos com os PDFs oficiais; para entender o porquê, use o tutor IA abaixo e confira na prova original.</div>`}
       ${SRC[q.src].antiga?`<div class="note"><b>Atenção:</b> ${esc(ANTIGA)}</div>`:''}
+      ${leiNote(q)}
       ${linksHTML(q)}
       ${ok&&!q.anulada?rateHTML():''}
       <div class="row"><button class="btn sm tut">Explicar de outro jeito (tutor IA)</button></div><div class="tslot"></div>`;
@@ -296,7 +320,7 @@ Comentário de referência: ${q.com||'(não há comentário escrito; baseie-se n
 
 /* ---------- Views ---------- */
 const V={};
-const QF0=()=>({tipo:'',orgao:'',banca:'',disc:'',ass:'',status:'pend',periodo:'',origem:'real',src:'',q:''});
+const QF0=()=>({tipo:'',orgao:'',banca:'',disc:'',ass:'',status:'pend',periodo:'',origem:'real',src:'',q:'',lei:''});
 let QF=QF0(), qIdx=0;
 const qfSet=o=>{QF=Object.assign(QF0(),o);qIdx=0};
 
@@ -356,6 +380,7 @@ function filtered(){
     if(QF.periodo==='rec'&&!(s.ano>=2022)) return false;
     if(QF.periodo==='ant'&&!(s.ano<2022)) return false;
     if(QF.disc&&q.disc!==QF.disc) return false;
+    if(QF.lei==='sem'&&LEI[q.id]&&LEI[q.id][0]==='mudou') return false; if(QF.lei==='so'&&!LEI[q.id]) return false;
     if(QF.ass&&q.ass!==QF.ass) return false;
     if(QF.q&&!searchHit(q,QF.q)) return false;
     if(QF.status==='fav') return !!S.fav[q.id];
@@ -383,6 +408,7 @@ V.questoes=()=>{
     <label class="f">Órgão<select id="fOrgao" ${QF.origem==='ia'?'disabled':''}>${opt([['','Todos'],...orgs.map(o=>[o,o])],QF.orgao)}</select></label>
     <label class="f" style="grid-column:span 2">Matéria<select id="fDisc">${opt([['','Todas'],...discs.map(d=>[d,d])],QF.disc)}</select></label>
     <label class="f">Período<select id="fPer">${opt([['','Todos os anos'],['rec','2022 em diante'],['ant','Até 2021']],QF.periodo)}</select></label>
+    <label class="f">Lei alterada<select id="fLei">${opt([['','Mostrar todas'],['sem','Ocultar as desatualizadas'],['so','Só as revisadas ('+Object.keys(LEI).length+')']],QF.lei)}</select></label>
     <label class="f">Mostrar<select id="fStatus">${opt([['pend','Não resolvidas'],['todas','Todas'],['erradas','Que errei'],['certas','Que acertei'],['fav','Favoritas ('+Object.keys(S.fav||{}).length+')'],['nota','Com anotação ('+Object.keys(S.notes||{}).length+')']],QF.status)}</select></label>
     ${QF.disc?`<label class="f" style="grid-column:span 2">Assunto<select id="fAss">${opt([['','Todos os assuntos'],...[...new Set(Q.filter(q=>q.disc===QF.disc&&q.ass).map(q=>q.ass))].sort((a,b)=>a.localeCompare(b,'pt')).map(a=>[a,a+' ('+Q.filter(q=>q.disc===QF.disc&&q.ass===a&&(QF.origem!=='real'||!q.ia)).length+')'])],QF.ass)}</select></label>`:''}
     <label class="f" style="grid-column:span ${QF.disc?2:4}">Buscar no enunciado<input id="fQ" type="search" value="${esc(QF.q)}" placeholder="ex.: crase, 8.112, licitação, prescrição" style="font:inherit;text-transform:none;letter-spacing:0;padding:7px 9px;border:1px solid var(--line2);border-radius:7px;background:var(--paper);color:var(--ink)"></label>
@@ -391,7 +417,7 @@ V.questoes=()=>{
   </div><div id="qslot"></div>`;
 };
 V.questoes.after=()=>{
-  const map={fTipo:'tipo',fBanca:'banca',fOrgao:'orgao',fDisc:'disc',fStatus:'status',fPer:'periodo',fAss:'ass'};
+  const map={fTipo:'tipo',fBanca:'banca',fOrgao:'orgao',fDisc:'disc',fStatus:'status',fPer:'periodo',fAss:'ass',fLei:'lei'};
   Object.keys(map).forEach(id=>{ const el=$('#'+id); if(el) el.onchange=e=>{ QF[map[id]]=e.target.value; if(id==='fTipo'){QF.orgao='';QF.banca='';QF.src=''} if(id==='fDisc') QF.ass=''; qIdx=0; render(); }; });
   const fq=$('#fQ'); let qt; fq.oninput=()=>{ clearTimeout(qt); qt=setTimeout(()=>{ QF.q=fq.value.trim(); qIdx=0; showQ(); },300); };
   document.querySelectorAll('[data-org]').forEach(b=>b.onclick=()=>{ QF.origem=b.dataset.org; QF.tipo='';QF.orgao='';QF.banca='';QF.src=''; qIdx=0; render(); });
